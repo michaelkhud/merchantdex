@@ -19,6 +19,9 @@
 !/log/.keep
 !/tmp/.keep
 
+# Ignore Kamal secrets file (local-only)
+/.kamal/secrets
+
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
