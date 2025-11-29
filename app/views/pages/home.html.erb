@@ -223,20 +223,30 @@ document.addEventListener('DOMContentLoaded', function() {
   <nav class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-50">
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
-        <a href="/" class="flex items-center gap-2">
+        <%= link_to root_path, class: "flex items-center gap-2" do %>
           <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
             <span class="text-white font-bold text-sm">M</span>
           </div>
           <span class="text-lg font-semibold text-slate-900">MerchantDex</span>
-        </a>
+        <% end %>
 
         <div class="hidden md:flex items-center gap-8">
           <a href="#features" class="text-slate-600 hover:text-slate-900 text-sm font-medium">Features</a>
           <a href="#how-it-works" class="text-slate-600 hover:text-slate-900 text-sm font-medium">How it works</a>
           <a href="#pricing" class="text-slate-600 hover:text-slate-900 text-sm font-medium">Pricing</a>
-          <a href="#" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-            Start Free
-          </a>
+          
+          <% if authenticated? %>
+            <%= link_to dashboard_path, class: "text-slate-600 hover:text-slate-900 text-sm font-medium", data: { turbo: false } do %>
+              Dashboard
+            <% end %>
+            <%= button_to logout_path, method: :delete, class: "bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors", data: { turbo: false } do %>
+              Sign out
+            <% end %>
+          <% else %>
+            <%= link_to login_path, class: "bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors", data: { turbo: false } do %>
+              Open App
+            <% end %>
+          <% end %>
         </div>
       </div>
     </div>
@@ -266,12 +276,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
           <!-- CTA Buttons -->
           <div class="flex flex-col sm:flex-row items-start gap-4 mb-6 animate-fade-in-up delay-300">
-            <a href="#" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 hover:scale-105 text-white px-6 py-3 rounded-lg font-semibold text-lg transition-all shadow-lg shadow-orange-500/25 animate-pulse-glow">
+            <%= link_to signup_path, class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 hover:scale-105 text-white px-6 py-3 rounded-lg font-semibold text-lg transition-all shadow-lg shadow-orange-500/25 animate-pulse-glow", data: { turbo: false } do %>
               Start Tracking Free
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
               </svg>
-            </a>
+            <% end %>
             <a href="#how-it-works" class="inline-flex items-center gap-2 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 hover:scale-105 px-6 py-3 rounded-lg font-semibold text-lg transition-all">
               See how it works
             </a>
@@ -870,9 +880,9 @@ document.addEventListener('DOMContentLoaded', function() {
             </li>
           </ul>
 
-          <a href="#" class="block w-full py-3 text-center bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition-colors">
+          <%= link_to signup_path, class: "block w-full py-3 text-center bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition-colors", data: { turbo: false } do %>
             Start Free
-          </a>
+          <% end %>
         </div>
 
         <!-- Premium Plan -->
@@ -922,9 +932,9 @@ document.addEventListener('DOMContentLoaded', function() {
             </li>
           </ul>
 
-          <a href="#" class="block w-full py-3 text-center bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors">
+          <%= link_to signup_path, class: "block w-full py-3 text-center bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors", data: { turbo: false } do %>
             Start 14-Day Free Trial
-          </a>
+          <% end %>
           <p class="text-center text-slate-500 text-sm mt-3">No credit card required</p>
         </div>
       </div>
@@ -1104,12 +1114,12 @@ document.addEventListener('DOMContentLoaded', function() {
         Join hundreds of P2P merchants who track every dollar with MerchantDex
       </p>
 
-      <a href="#" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors">
+      <%= link_to signup_path, class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors", data: { turbo: false } do %>
         Start Tracking Free
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
         </svg>
-      </a>
+      <% end %>
 
       <p class="mt-6 text-slate-500 text-sm">
         Free plan. No credit card. See your profit in 30 seconds.

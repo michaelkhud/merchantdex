@@ -1,4 +1,17 @@
 Rails.application.routes.draw do
+  # Authentication routes
+  resource :session, only: [:new, :create, :destroy]
+  resources :passwords, param: :token, only: [:new, :create, :edit, :update]
+  resource :registration, only: [:new, :create]
+  
+  # Dashboard
+  get "dashboard", to: "dashboard#index"
+  
+  # Convenience routes
+  get "login", to: "sessions#new"
+  get "signup", to: "registrations#new"
+  delete "logout", to: "sessions#destroy"
+  
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
