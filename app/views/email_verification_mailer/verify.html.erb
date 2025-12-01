@@ -1,0 +1,33 @@
+<% token = @user.generate_token_for(:email_verification) %>
+<p style="margin: 0 0 24px 0; font-size: 18px; color: #f1f5f9;">
+  Welcome to MerchantDex!
+</p>
+
+<p>
+  Thanks for signing up. Please verify your email address by clicking the button below.
+</p>
+
+<div class="text-center" style="margin: 32px 0;">
+  <%= link_to "Verify Email Address", verify_email_url(token: token), class: "btn" %>
+</div>
+
+<div class="divider"></div>
+
+<p class="text-muted">
+  This link will expire in <strong style="color: #f97316;">24 hours</strong>.
+</p>
+
+<p class="text-muted">
+  If you didn't create an account on MerchantDex, you can safely ignore this email.
+</p>
+
+<div class="divider"></div>
+
+<p class="text-muted" style="font-size: 12px;">
+  If the button above doesn't work, copy and paste this link into your browser:
+  <br>
+  <a href="<%= verify_email_url(token: token) %>" style="word-break: break-all;">
+    <%= verify_email_url(token: token) %>
+  </a>
+</p>
+

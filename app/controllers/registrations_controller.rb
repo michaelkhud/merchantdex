@@ -10,8 +10,8 @@ class RegistrationsController < ApplicationController
     @user = User.new(registration_params)
     
     if @user.save
-      start_new_session_for @user
-      redirect_to dashboard_path, notice: "Welcome to MerchantDex! Your account has been created."
+      EmailVerificationMailer.verify(@user).deliver_later
+      redirect_to new_email_verification_path(email: @user.email_address), notice: "Verification email sent! Please check your inbox."
     else
       render :new, status: :unprocessable_entity
     end

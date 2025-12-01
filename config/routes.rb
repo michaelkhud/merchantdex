@@ -3,6 +3,8 @@ Rails.application.routes.draw do
   resource :session, only: [:new, :create, :destroy]
   resources :passwords, param: :token, only: [:new, :create, :edit, :update]
   resource :registration, only: [:new, :create]
+  resource :email_verification, only: [:new, :create]
+  get "email_verification/verify/:token", to: "email_verifications#show", as: :verify_email
   
   # Dashboard
   get "dashboard", to: "dashboard#index"
