@@ -1,18 +1,12 @@
 Rails.application.routes.draw do
-  # Authentication routes
-  resource :session, only: [:new, :create, :destroy]
-  resources :passwords, param: :token, only: [:new, :create, :edit, :update]
-  resource :registration, only: [:new, :create]
-  resource :email_verification, only: [:new, :create]
-  get "email_verification/verify/:token", to: "email_verifications#show", as: :verify_email
+  resource :session
+  resources :passwords, param: :token
+  resources :trades, only: [:index, :create, :destroy]
   
-  # Dashboard
+  get "signup", to: "registrations#new", as: :signup
+  post "signup", to: "registrations#create"
+  
   get "dashboard", to: "dashboard#index"
-  
-  # Convenience routes
-  get "login", to: "sessions#new"
-  get "signup", to: "registrations#new"
-  delete "logout", to: "sessions#destroy"
   
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

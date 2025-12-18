@@ -23,15 +23,6 @@ module Authentication
 
     def resume_session
       Current.session ||= find_session_by_cookie
-      
-      # Check if user's email is verified
-      if Current.session && !Current.session.user.email_verified?
-        redirect_to new_email_verification_path(email: Current.session.user.email_address), 
-                    alert: "Please verify your email address to continue."
-        return nil
-      end
-      
-      Current.session
     end
 
     def find_session_by_cookie
@@ -44,7 +35,7 @@ module Authentication
     end
 
     def after_authentication_url
-      session.delete(:return_to_after_authenticating) || dashboard_url
+      session.delete(:return_to_after_authenticating) || root_url
     end
 
     def start_new_session_for(user)

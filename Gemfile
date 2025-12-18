@@ -66,3 +66,8 @@ group :test do
 end
 
 gem "tailwindcss-rails", "~> 4.4"
+gem "csv"
+
+# Excel file parsing for Bybit imports
+gem "roo", "~> 2.10"
+gem "roo-xls", "~> 1.2"  # Support for .xls (legacy Excel format)

@@ -1,7 +1,6 @@
 <% content_for :title, "Dashboard - MerchantDex" %>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-  <!-- Dashboard Content -->
   <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
     <!-- Welcome Section -->
     <div class="mb-8">
@@ -19,7 +18,7 @@
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900 mb-1">$0</p>
+        <p class="text-2xl font-bold text-slate-900 mb-1">$<%= number_with_precision(@total_profit, precision: 2, delimiter: ',') %></p>
         <p class="text-sm text-slate-500">Total Profit</p>
       </div>
 
@@ -31,7 +30,7 @@
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900 mb-1">0</p>
+        <p class="text-2xl font-bold text-slate-900 mb-1"><%= number_with_delimiter(@total_trades) %></p>
         <p class="text-sm text-slate-500">Trades</p>
       </div>
 
@@ -43,30 +42,74 @@
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900 mb-1">0</p>
+        <p class="text-2xl font-bold text-slate-900 mb-1"><%= @unique_clients %></p>
         <p class="text-sm text-slate-500">Clients</p>
       </div>
     </div>
 
-    <!-- Getting Started Card -->
-    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-200">
-      <div class="flex items-start gap-4">
-        <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-900 mb-2">Ready to start tracking?</h3>
-          <p class="text-slate-600 mb-6">
-            Upload your first CSV from Binance, Bybit, OKX, or KuCoin to see your real profit breakdown in 30 seconds.
-          </p>
-          <a href="#" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-            Upload CSV
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <!-- Import Trades -->
+      <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="p-6 text-center">
+          <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
             </svg>
-          </a>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 mb-2">Import Trades</h3>
+          <p class="text-slate-500 text-sm mb-6">LocalCoinSwap, Binance, Bybit, KuCoin, OKX</p>
+          <%= form_with url: trades_path, method: :post, multipart: true, id: "import-form", data: { turbo: false } do |form| %>
+            <%= form.file_field :trade_file, accept: ".csv,.xls,.xlsx", required: true, class: "hidden", id: "trade-file-input",
+                onchange: "document.getElementById('import-form').submit(); document.getElementById('import-btn').classList.add('opacity-75', 'pointer-events-none'); document.getElementById('import-btn-text').textContent = 'Uploading...';" %>
+            <label for="trade-file-input" id="import-btn" class="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-all cursor-pointer">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span id="import-btn-text">Import File</span>
+            </label>
+          <% end %>
+        </div>
+        <div class="bg-slate-50 px-6 py-3 text-center border-t border-slate-100">
+          <span class="text-xs text-slate-500">Supports CSV & Excel files</span>
+        </div>
+      </div>
+
+      <!-- View Trades -->
+      <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="p-6 text-center">
+          <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 mb-2">View Trades</h3>
+          <p class="text-slate-500 text-sm mb-6">
+            <% if @total_trades > 0 %>
+              <%= @total_trades %> trades across <%= @platforms.count %> platforms
+            <% else %>
+              No trades imported yet
+            <% end %>
+          </p>
+          <%= link_to trades_path, class: "inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-lg font-semibold transition-all" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            View All
+          <% end %>
+        </div>
+        <div class="bg-slate-50 px-6 py-3 text-center border-t border-slate-100">
+          <% if @platforms.any? %>
+            <div class="flex justify-center gap-2">
+              <% @platforms.each do |platform| %>
+                <span class="text-xs text-slate-500"><%= platform.titleize %></span>
+                <% unless platform == @platforms.last %><span class="text-slate-300">•</span><% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <span class="text-xs text-slate-500">Import trades to get started</span>
+          <% end %>
         </div>
       </div>
     </div>
@@ -91,6 +134,3 @@
     </div>
   </div>
 </div>
-
-
-

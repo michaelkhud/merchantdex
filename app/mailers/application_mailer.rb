@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "MerchantDex <support@natan.gemalux.shop>"
+  default from: "from@example.com"
   layout "mailer"
 end
