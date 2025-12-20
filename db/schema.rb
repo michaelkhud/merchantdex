@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_18_051956) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_20_082407) do
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -50,6 +50,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_051956) do
     t.string "country"
     t.datetime "created_at", null: false
     t.string "email_address", null: false
+    t.string "email_verification_code"
+    t.datetime "email_verification_sent_at"
     t.datetime "email_verified_at"
     t.string "name"
     t.string "password_digest", null: false

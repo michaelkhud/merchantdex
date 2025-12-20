@@ -11,6 +11,72 @@
 
     <%= yield :head %>
 
+    <!-- Tom Select for autocomplete -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <style>
+      /* Custom Tom Select styling to match the app design */
+      .counterparty-select .ts-wrapper {
+        width: 100%;
+      }
+      .counterparty-select .ts-wrapper.single .ts-control {
+        border: 1px solid #fdba74;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        background: white;
+        box-shadow: none;
+        min-height: 38px;
+      }
+      .counterparty-select .ts-wrapper.single .ts-control:focus,
+      .counterparty-select .ts-wrapper.single.focus .ts-control {
+        border-color: #f97316;
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+      }
+      .counterparty-select .ts-wrapper .ts-control > input {
+        font-size: 0.875rem;
+      }
+      .counterparty-select .ts-wrapper .ts-control > input::placeholder {
+        color: #94a3b8;
+      }
+      .counterparty-select .ts-dropdown {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-top: 4px;
+      }
+      .counterparty-select .ts-dropdown .option {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+      }
+      .counterparty-select .ts-dropdown .option:hover,
+      .counterparty-select .ts-dropdown .option.active {
+        background: #fff7ed;
+        color: #ea580c;
+      }
+      .counterparty-select .ts-dropdown .create {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      /* Date picker styling for orange theme */
+      input[type="date"].date-picker-orange {
+        color-scheme: light;
+      }
+      input[type="date"].date-picker-orange::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        filter: hue-rotate(180deg) saturate(1.5);
+      }
+
+      /* Style the native date picker calendar (Chrome/Edge) */
+      input[type="date"]::-webkit-datetime-edit {
+        padding: 0;
+      }
+      input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+        padding: 0;
+      }
+    </style>
+
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 

@@ -1,26 +1,59 @@
 <% content_for :title, "Trades - MerchantDex" %>
 
+<%
+  # Prepare platform options for inline editing
+  platform_options = @available_platforms.map { |p| { value: p, label: p.titleize } }
+  trade_type_options = [{ value: "buy", label: "Buy" }, { value: "sell", label: "Sell" }]
+  status_options = [{ value: "COMPLETED", label: "Completed" }, { value: "CANCELLED", label: "Cancelled" }]
+
+  # Platform color mapping - must match JavaScript controller
+  platform_colors = {
+    'private' => 'bg-slate-100 text-slate-800',
+    'binance' => 'bg-yellow-100 text-yellow-800',
+    'paxful' => 'bg-blue-100 text-blue-800',
+    'noones' => 'bg-purple-100 text-purple-800',
+    'localbitcoins' => 'bg-orange-100 text-orange-800',
+    'localcoinswap' => 'bg-green-100 text-green-800',
+    'coinbase' => 'bg-indigo-100 text-indigo-800',
+    'kraken' => 'bg-violet-100 text-violet-800',
+    'kucoin' => 'bg-teal-100 text-teal-800',
+    'bybit' => 'bg-amber-100 text-amber-800',
+    'okx' => 'bg-cyan-100 text-cyan-800',
+  }
+  fallback_colors = [
+    'bg-rose-100 text-rose-800',
+    'bg-emerald-100 text-emerald-800',
+    'bg-sky-100 text-sky-800',
+    'bg-fuchsia-100 text-fuchsia-800',
+    'bg-lime-100 text-lime-800',
+  ]
+%>
+
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
   <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-3xl font-bold text-slate-900 mb-2">Your Trades</h1>
-        <p class="text-slate-600">View and manage all your P2P trades</p>
+        <p class="text-slate-600">Click on any cell to edit. Changes save automatically.</p>
       </div>
       <%= link_to dashboard_path, class: "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900" do %>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
         </svg>
-        Back to Dashboard
+        Dashboard
       <% end %>
     </div>
 
     <!-- Stats -->
-    <div class="grid md:grid-cols-4 gap-4 mb-8">
+    <div class="grid md:grid-cols-5 gap-4 mb-8">
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
         <p class="text-sm text-slate-500">Total Profit</p>
         <p class="text-xl font-bold text-green-600">$<%= number_with_precision(@total_profit, precision: 2, delimiter: ',') %></p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+        <p class="text-sm text-slate-500">Avg Margin</p>
+        <p class="text-xl font-bold <%= @average_margin >= 0 ? 'text-blue-600' : 'text-orange-600' %>"><%= @average_margin >= 0 ? '+' : '' %><%= number_with_precision(@average_margin, precision: 2) %>%</p>
       </div>
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
         <p class="text-sm text-slate-500">Completed Trades</p>
@@ -38,12 +71,12 @@
 
     <!-- Filters -->
     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-6">
-      <div class="flex flex-wrap gap-4">
+      <div class="flex flex-wrap items-end gap-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Platform</label>
           <select onchange="window.location.href = this.value" class="px-3 py-2 border border-slate-300 rounded-lg text-sm">
             <option value="<%= trades_path %>" <%= 'selected' if params[:platform].blank? %>>All Platforms</option>
-            <% @platforms.each do |platform| %>
+            <% @available_platforms.each do |platform| %>
               <option value="<%= trades_path(platform: platform) %>" <%= 'selected' if params[:platform] == platform %>><%= platform.titleize %></option>
             <% end %>
           </select>
@@ -64,6 +97,13 @@
             <option value="<%= trades_path(params.permit(:platform, :trade_type).merge(status: 'CANCELLED')) %>" <%= 'selected' if params[:status] == 'CANCELLED' %>>Cancelled</option>
           </select>
         </div>
+        <div class="flex-grow"></div>
+        <%= link_to quick_create_trades_path, method: :post, class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors self-end", data: { turbo_method: :post } do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          New Trade
+        <% end %>
       </div>
     </div>
 
@@ -71,56 +111,149 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <% if @trades.any? %>
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full table-fixed">
             <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Platform</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Type</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Crypto</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Counterparty</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Profit</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-20">Type</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Date</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-24">Platform</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-32">Client</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Received</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Sold</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-24">Profit</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-20">Margin</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Status</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-12"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
               <% @trades.each do |trade| %>
-                <tr class="hover:bg-slate-50">
-                  <td class="px-4 py-3 text-sm text-slate-900">
-                    <%= trade.time_completed&.strftime("%b %d, %Y") || trade.time_created&.strftime("%b %d, %Y") %>
-                  </td>
-                  <td class="px-4 py-3">
-                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                      <%= trade.platform.titleize %>
-                    </span>
-                  </td>
-                  <td class="px-4 py-3">
-                    <span class="px-2 py-1 text-xs font-medium rounded-full <%= trade.trade_type == 'buy' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+                <tr class="hover:bg-slate-50 group">
+                  <!-- Trade Type -->
+                  <td class="px-4 py-3"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="trade_type"
+                      data-inline-edit-field-type-value="select"
+                      data-inline-edit-options-value="<%= trade_type_options.to_json %>">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.trade_type %>"
+                          data-action="click->inline-edit#edit"
+                          class="px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:ring-2 hover:ring-orange-500 <%= trade.trade_type == 'buy' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
                       <%= trade.trade_type.upcase %>
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-900">
-                    <%= number_with_precision(trade.crypto_amount, precision: 2, delimiter: ',') %> <%= trade.cryptocurrency %>
+
+                  <!-- Date -->
+                  <td class="px-4 py-3 text-sm text-slate-900"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="time_created"
+                      data-inline-edit-field-type-value="date">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.time_created&.strftime('%Y-%m-%d') %>"
+                          data-action="click->inline-edit#edit"
+                          class="cursor-pointer hover:bg-orange-50 px-1 rounded">
+                      <%= trade.time_completed&.strftime("%b %d, %Y") || trade.time_created&.strftime("%b %d, %Y") %>
+                    </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-900">
-                    $<%= number_with_precision(trade.local_currency_amount, precision: 2, delimiter: ',') %> <%= trade.local_currency %>
+
+                  <!-- Platform -->
+                  <%
+                    platform_key = trade.platform.to_s.downcase
+                    platform_color = platform_colors[platform_key]
+                    unless platform_color
+                      hash = platform_key.chars.sum(&:ord)
+                      platform_color = fallback_colors[hash % fallback_colors.length]
+                    end
+                  %>
+                  <td class="px-4 py-3"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="platform"
+                      data-inline-edit-field-type-value="select"
+                      data-inline-edit-options-value="<%= platform_options.to_json %>">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.platform %>"
+                          data-action="click->inline-edit#edit"
+                          class="px-2 py-1 text-xs font-medium rounded-full <%= platform_color %> cursor-pointer hover:ring-2 hover:ring-orange-500">
+                      <%= trade.platform.titleize %>
+                    </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-600">
-                    <%= trade.counterparty || '-' %>
+
+                  <!-- Counterparty -->
+                  <td class="px-4 py-3 text-sm text-slate-600"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="counterparty"
+                      data-inline-edit-field-type-value="counterparty">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.counterparty %>"
+                          data-action="click->inline-edit#edit"
+                          class="cursor-pointer hover:bg-orange-50 px-1 rounded min-w-[60px] inline-block">
+                      <%= trade.counterparty.presence || '—' %>
+                    </span>
                   </td>
-                  <td class="px-4 py-3">
-                    <span class="px-2 py-1 text-xs font-medium rounded-full <%= trade.status == 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+
+                  <!-- Local Currency Amount (Received) -->
+                  <td class="px-4 py-3 text-sm text-slate-900 text-right"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="local_currency_amount"
+                      data-inline-edit-field-type-value="number">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.local_currency_amount %>"
+                          data-action="click->inline-edit#edit"
+                          class="cursor-pointer hover:bg-orange-50 px-1 rounded">
+                      $<%= number_with_precision(trade.local_currency_amount, precision: 2, delimiter: ',') %>
+                    </span>
+                  </td>
+
+                  <!-- Market Value (Sold) -->
+                  <td class="px-4 py-3 text-sm text-slate-900 text-right"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="market_value"
+                      data-inline-edit-field-type-value="number">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.market_value %>"
+                          data-action="click->inline-edit#edit"
+                          class="cursor-pointer hover:bg-orange-50 px-1 rounded">
+                      $<%= number_with_precision(trade.market_value, precision: 2, delimiter: ',') %>
+                    </span>
+                  </td>
+
+                  <!-- Profit (calculated, not editable) -->
+                  <td class="px-4 py-3 text-sm text-right font-medium <%= trade.profit >= 0 ? 'text-green-600' : 'text-red-600' %>" data-field="profit">
+                    <%= trade.profit >= 0 ? '+' : '' %>$<%= number_with_precision(trade.profit, precision: 2, delimiter: ',') %>
+                  </td>
+
+                  <!-- Margin (calculated, not editable) -->
+                  <td class="px-4 py-3 text-sm text-right font-medium <%= trade.margin >= 0 ? 'text-blue-600' : 'text-orange-600' %>" data-field="margin">
+                    <%= trade.margin >= 0 ? '+' : '' %><%= number_with_precision(trade.margin, precision: 2) %>%
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-4 py-3 text-center"
+                      data-controller="inline-edit"
+                      data-inline-edit-trade-id-value="<%= trade.id %>"
+                      data-inline-edit-field-value="status"
+                      data-inline-edit-field-type-value="select"
+                      data-inline-edit-options-value="<%= status_options.to_json %>">
+                    <span data-inline-edit-target="display"
+                          data-value="<%= trade.status %>"
+                          data-action="click->inline-edit#edit"
+                          class="px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:ring-2 hover:ring-orange-500 <%= trade.status == 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
                       <%= trade.status %>
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-right font-medium <%= trade.profit >= 0 ? 'text-green-600' : 'text-red-600' %>">
-                    <%= trade.profit >= 0 ? '+' : '' %>$<%= number_with_precision(trade.profit, precision: 2, delimiter: ',') %>
-                  </td>
+
+                  <!-- Delete -->
                   <td class="px-4 py-3 text-right">
-                    <%= button_to trade_path(trade), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this trade?" }, class: "text-red-600 hover:text-red-800 text-sm" do %>
-                      Delete
+                    <%= button_to trade_path(trade), method: :delete, data: { turbo_confirm: "Delete this trade?" }, class: "text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" do %>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
                     <% end %>
                   </td>
                 </tr>
@@ -128,17 +261,36 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Add new row button at bottom -->
+        <div class="border-t border-slate-200 px-4 py-3">
+          <%= link_to quick_create_trades_path, method: :post, class: "inline-flex items-center gap-2 text-slate-500 hover:text-orange-600 text-sm", data: { turbo_method: :post } do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add new trade
+          <% end %>
+        </div>
       <% else %>
         <div class="p-12 text-center">
           <svg class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
           </svg>
-          <h3 class="text-lg font-medium text-slate-900 mb-2">No trades found</h3>
-          <p class="text-slate-600 mb-4">Import your trades from the dashboard to get started.</p>
-          <%= link_to "Go to Dashboard", dashboard_path, class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors" %>
+          <h3 class="text-lg font-medium text-slate-900 mb-2">No trades yet</h3>
+          <p class="text-slate-600 mb-4">Add your first trade or import from the dashboard.</p>
+          <div class="flex items-center justify-center gap-4">
+            <%= link_to quick_create_trades_path, method: :post, class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors", data: { turbo_method: :post } do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add Trade
+            <% end %>
+            <%= link_to "Go to Dashboard", dashboard_path, class: "text-slate-600 hover:text-slate-900" %>
+          </div>
         </div>
       <% end %>
     </div>
   </div>
 </div>
+
 

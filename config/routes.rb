@@ -1,11 +1,22 @@
 Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
-  resources :trades, only: [:index, :create, :destroy]
-  
+  resources :trades, only: [:index, :new, :create, :edit, :update, :destroy] do
+    patch :inline_update, on: :member
+    post :quick_create, on: :collection
+    get :counterparties, on: :collection
+  end
+
   get "signup", to: "registrations#new", as: :signup
   post "signup", to: "registrations#create"
-  
+  get "login", to: "sessions#new", as: :login
+
+  # Email verification with 6-digit code
+  resource :email_verification, only: [:new] do
+    post :verify, on: :collection
+    post :resend, on: :collection
+  end
+
   get "dashboard", to: "dashboard#index"
   
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

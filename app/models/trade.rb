@@ -22,7 +22,7 @@ class Trade < ApplicationRecord
 
   def profit
     return 0 unless status == "COMPLETED"
-    
+
     case trade_type
     when "buy"
       # Bought crypto below market value = profit
@@ -34,5 +34,16 @@ class Trade < ApplicationRecord
       0
     end
   end
+
+  def margin
+    return 0 unless status == "COMPLETED"
+    return 0 if market_value.nil? || market_value.zero?
+
+    (profit / market_value * 100).round(2)
+  end
 end
+
+
+
+
 

@@ -9,7 +9,7 @@
   </div>
 
   <!-- Form -->
-  <%= form_with model: @user, url: registration_path, method: :post, data: { turbo: false } do |form| %>
+  <%= form_with model: @user, url: signup_path, method: :post, data: { turbo: false } do |form| %>
     <!-- Error Messages -->
     <% if @user.errors.any? %>
       <div class="mb-6 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-xl p-4 border border-red-500/30">

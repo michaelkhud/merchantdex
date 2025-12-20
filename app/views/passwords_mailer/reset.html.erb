@@ -1,6 +1,33 @@
-<p>
-  You can reset your password on
-  <%= link_to "this password reset page", edit_password_url(@user.password_reset_token) %>.
+<p style="margin: 0 0 24px 0; font-size: 18px; color: #f1f5f9;">
+  Hello!
+</p>
 
-  This link will expire in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+<p>
+  We received a request to reset your password for your MerchantDex account.
+  Click the button below to choose a new password.
+</p>
+
+<div class="text-center" style="margin: 32px 0;">
+  <%= link_to "Reset Password", edit_password_url(@user.password_reset_token), class: "btn" %>
+</div>
+
+<div class="divider"></div>
+
+<p class="text-muted">
+  This link will expire in <strong style="color: #f97316;"><%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %></strong>.
+</p>
+
+<p class="text-muted">
+  If you didn't request a password reset, you can safely ignore this email.
+  Your password will remain unchanged.
+</p>
+
+<div class="divider"></div>
+
+<p class="text-muted" style="font-size: 12px;">
+  If the button above doesn't work, copy and paste this link into your browser:
+  <br>
+  <a href="<%= edit_password_url(@user.password_reset_token) %>" style="word-break: break-all;">
+    <%= edit_password_url(@user.password_reset_token) %>
+  </a>
 </p>
